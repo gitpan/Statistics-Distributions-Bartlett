@@ -11,7 +11,6 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
         'version'    => 0,
         'Statistics::Distributions' => '1.02', 
-        'Math::Cephes' => '0.47', 
         'Carp' => '1.08', 'Perl6::Form' => '0.04',
         'List::Util' => '1.19',
     },

@@ -1,4 +1,4 @@
-Statistics-Distributions-Bartlett version 0.0.1
+Statistics-Distributions-Bartlett version 0.0.2 
 
 Bartlett test is used to test if k samples have equal variances. Such homogeneity of is assumed by other statistical tests.  
 The Bartlett test can be used to verify that assumption. See
@@ -24,7 +24,6 @@ Alternatively, to install with Module::Build, you can use the following commands
 DEPENDENCIES
 
 'Statistics::Distributions' => '1.02', 
-'Math::Cephes' => '0.47', 
 'Carp' => '1.08', 'Perl6::Form' => '0.04',
 'List::Util' => '1.19',
 

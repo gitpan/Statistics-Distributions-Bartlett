@@ -1,14 +1,10 @@
 package Statistics::Distributions::Bartlett;
 
-#r/ change to Statistics::Distributions::Bartlett?!?
-
 use warnings;
 use strict;
 use Carp;
 use Statistics::Distributions qw/chisqrprob/;
-#use Statistics::Descriptive;
 use List::Util qw/sum/;
-use Math::Cephes qw/:utils/;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -19,74 +15,63 @@ our @EXPORT = qw(bartlett);
 Statistics::Distributions::Bartlett - Bartlett's test for equal sample variances.
 
 =cut
+
 =head1 VERSION
 
-This document describes Statistics::Distributions::Bartlett version 0.0.1
+This document describes Statistics::Distributions::Bartlett version 0.0.2
 
 =cut
+
 =head1 SYNOPSIS
 
     use Statistics::Distributions::Bartlett;
+                           
+    # Create data to pass as ARRAY/ARRAY references
+    my @a = [qw/4534543  543 453 5 543 534 5 4 543 543 6 534 54 3 534  534 54 5/];
+    my @b = [qw/ 546 565 65 64  5 434 65 457 67 78 6  34 2 6 57 43  2 556 7 4563/];
+    my @c = [qw/ 565 44 535 6678 787 5 5/];
+                             
+    # Call exported sub routine on ARRAY references of data to print result to STDOUT.
+    &bartlett(\@a,\@b,\@c);
 
-    my $a = [qw/ 10 7  20 14 14 12 10 23 17 20 14 13/];
-    my $b = [qw/ 11 17 21 11 16 14 17 17 19 21 7  13/];
-    my $c = [qw/ 0  1  7  2  3  1  2  1  3  0  1  4/];
-    my $d = [qw/ 3  5  12 6 4  3  5  5  5  5  2 4/];
-    my $e = [qw/ 3  5  3  5  3  6  1  1  3  2  6 4/];
-    my $f = [qw/ 11 9 15 22  15 16 13 10 26 26 24 13 /];
-
-    # Call exported sub routine on ARRAY references of data.
-    my $bar = &Statistics::Distributions::Bartlett::bartlett($a,$b,$c,$d,$e,$f);
+    # Call in LIST-context to access results directly:
+    my ($K, $p_val, $df, $k, $n_total ) = &bartlett(\@a,\@b,\@c);
 
 =cut
+
 =head1 DESCRIPTION
 
-Bartlett test is used to test if k samples have equal variances. Such homogeneity of is assumed by other statistical tests.  
-The Bartlett test can be used to verify that assumption. See
-http://www.itl.nist.gov/div898/handbook/eda/section3/eda357.htm.
+Bartlett test is used to test if k samples have equal variances. Such homogeneity is often assumed by other statistical
+tests and consequently the Bartlett test should be used to verify that assumption. See http://www.itl.nist.gov/div898/handbook/eda/section3/eda357.htm.
 
 =cut
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
-# have a check that all args are numeric in the arrays - i.e. a 1-d equiv of that in MVA
-# transpose is always there as we need our arrays to be variable-centric - i.e. rows must be variables and NOT observations!?!
-
-#b bartlett´s univariate uses variance and not SS
 sub bartlett {
-
-    #r (    n_total - k ) * ln  ( S_p^2 )  - sum (  n_i-1) * ln  ( S_i^2 )     /   1 + ( 1/(3(k-1))) * ( ( sum ( 1 / (n_i-1) ) - ( 1 / (n_total-k))
-    #r S_p^2 = sum ( n_i - 1 ) * S_i^2 / (n_total-k)
-
     my @groups = @_;
     my $k = scalar @groups;
     croak qq{\nThere must be more than one group} if ($k < 2);
     my $vars = &var(\@groups);
     my $n_total = sum map { scalar @{$_} } @groups;
-
     #my $SS_p = sum map { print qq{\nss $_->[2] and n $_->[0] and }, ($_->[2]-1) * $_->[0] ;($_->[2]-1) * $_->[0]  } @{$SSs};
     my $var_p = sum  map { ($_->[1]-1) * $_->[0]  } @{$vars};
-
     $var_p /= ($n_total-$k);
     $var_p = log($var_p);
-
     #my $SS_sum = sum map { print qq{\nss $_->[2] and n $_->[0] and }, log($_->[0]);($_->[2]-1) * log($_->[0])  } @{$SSs};
     my $var_sum = sum map { ($_->[1]-1) * log($_->[0])  } @{$vars};
-
     my $n_under = sum map { 1 / ($_->[1] - 1) } @{$vars};
     my $bar_k = ( ( ($n_total-$k) * $var_p ) - $var_sum ) / (1 + ( 1 / ( 3 * ($k-1))) * ( $n_under - ( 1 / ($n_total-$k)) ) ) ;
     my $df = $k -1;
     my $pval = &chisqrprob($df,$bar_k);
-
     if ( !wantarray ) { print qq{\nK = $bar_k\np_val = $pval\ndf = $df\nk = $k\ntotal n = $n_total}; return; }
     else { return ($bar_k, $pval, $df, $k, $n_total) }
-
+    return;
 }
 
 sub var { 
     my $groups = shift;
     my $result = [];
-
     for my $a_ref (@{$groups}) {
         # $stat->count()
         my $n = scalar(@{$a_ref});
@@ -108,21 +93,23 @@ __END__
 =head1 DEPENDENCIES
 
 'Statistics::Distributions' => '1.02', 
-'Math::Cephes' => '0.47', 
-'Carp' => '1.08', 'Perl6::Form' => '0.04',
+'Carp' => '1.08',
 'List::Util' => '1.19',
 
 =cut
+
 =head1 BUGS
 
 Let me know.
 
 =cut
+
 =head1 AUTHOR
 
 Daniel S. T. Hughes  C<< <dsth@cantab.net> >>
 
 =cut
+
 =head1 LICENCE AND COPYRIGHT
 
 Copyright (c) 2010, Daniel S. T. Hughes C<< <dsth@cantab.net> >>. All rights reserved.
@@ -131,6 +118,7 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
 
 =cut
+
 =head1 DISCLAIMER OF WARRANTY
 
 Because this software is licensed free of charge, there is no warranty
